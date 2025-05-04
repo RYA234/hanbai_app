@@ -10,5 +10,6 @@ docker-compose n
 docker-compose build
 docker-compose up -d
 
+docker-compose exec   hanbai_app  bash
 
 ```
