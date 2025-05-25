@@ -16,31 +16,53 @@ services:
     ports:
       - "3000:3000"
     networks:
-       task_network:
+       hanbai_network:
 
   postgre_hanbai:
     container_name: postgre_task
     build: ./docker/postgresql 
     environment:
       TZ: 'Asia/Tokyo'
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
       - ./docker/postgresql/init:/docker-entrypoint-initdb.d
       - ./src:/src
-      - task-collect-db-data:/var/lib/postgresql/data
+      - hanbai-db-data:/var/lib/postgresql/data
     working_dir: /src
     networks:
-       task_network:
-          ipv4_address: 172.25.1.89
+       hanbai_network:
+          ipv4_address: 172.25.2.89
+  db:
+    image: mysql:8.0
+    container_name: mysql_host
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_database
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+      TZ: 'Asia/Tokyo'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+    - ./docker/db/data:/var/lib/mysql
+    - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+    - ./docker/db/sql:/docker-entrypoint-initdb.d
+    ports:
+    - 3308:3306
+    networks:
+     hanbai_network:
+      ipv4_address: 172.25.2.90
+
 networks:
-  task_network:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.25.1.0/24
+  hanbai_network:
+      ipam:
+        driver: default
+        config:
+          - subnet: 172.25.2.0/24
 volumes:
-  task-collect-db-data:
+  hanbai-db-data:
+  db-store:
